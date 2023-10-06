@@ -1,53 +1,32 @@
-name: Deploy Website
+name: Deploy to Docker Hub
 
 on:
   push:
     branches:
-      - Sprint_1_Dev # Replace with the branch you want to trigger the workflow
+      - main
 
 jobs:
   build:
-    name: Build Docker Image
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
-
-    env:
-      DOCKER_IMAGE: phamk0712/autodeploytest:latest
-
     steps:
-      - name: Check out code
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-
-      - name: Set up Docker Buildx
+      - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build Docker Image
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and Push Docker Image
+        id: docker_build
         uses: docker/build-push-action@v2
         with:
           context: .
+          file: ./Dockerfile  # Update this path to match the actual location of your Dockerfile
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}
-          builder: ${{ secrets.DOCKER_BUILDER }}
-          build-args: |
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          script: |
-            # Add any deployment commands here, such as pulling the updated Docker image and restarting the container.
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-            docker pull ${{ env.DOCKER_IMAGE }}
-            docker stop my-website-container || true
-            docker rm my-website-container || true
-            docker run -d --name my-website-container -p 80:80 ${{ env.DOCKER_IMAGE }}
+          tags: phamk0712/autodeploytest:latest
