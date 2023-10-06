@@ -27,8 +27,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             ssh -i ${{ secrets.EC2_SSH_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' << 'ENDSSH'
+            # Stop and remove the existing container, if any
             docker stop my-website-container || true
             docker rm my-website-container || true
+
+            # Pull the latest Docker image
             docker pull my-website-image
+
+            # Run a new container with the updated image
             docker run -d -p 80:80 --name my-website-container my-website-image
             ENDSSH
