@@ -3,7 +3,7 @@ name: Deploy to Docker Hub
 on:
   push:
     branches:
-      - main
+      - Sprint_1_Dev # Change this branch name to match your branch
 
 jobs:
   build:
