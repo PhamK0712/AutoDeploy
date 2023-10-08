@@ -28,7 +28,7 @@ jobs:
           git pull origin Sprint_1_Dev
 
           # Use Docker Compose to manage your website container
-          docker-compose -f docker-compose.yml up -d --build
+          sudo docker-compose -f docker-compose.yml up -d --build
 
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
