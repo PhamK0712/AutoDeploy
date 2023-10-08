@@ -8,8 +8,7 @@ WORKDIR /usr/share/nginx/html
 COPY ./Sprint_1_Product/ .
 
 # Replace the default NGINX configuration with your custom configuration
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80 to allow external access
 EXPOSE 80
