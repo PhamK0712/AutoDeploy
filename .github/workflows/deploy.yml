@@ -1,32 +1,36 @@
-name: Deploy to Docker Hub
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - Sprint_1_Dev # Change this branch name to match your branch
+      - Sprint_1_Dev
 
 jobs:
-  build:
-    name: Build and Push Docker Image
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v1
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: 22
+        script: |
+          # Change to your project directory on the EC2 instance
+          cd ~/website
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          # Update your GitHub repository on the EC2 instance
+          git pull origin Sprint_1_Dev
 
-      - name: Build and Push Docker Image
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile  # Update this path to match the actual location of your Dockerfile
-          push: true
-          tags: phamk0712/autodeploytest:latest
+          # Use Docker Compose to manage your website container
+          docker-compose -f docker-compose.yml up -d --build
+
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+        EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
