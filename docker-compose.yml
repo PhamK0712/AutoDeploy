@@ -1,0 +1,11 @@
+
+version: '3'
+services:
+  my-website:
+    image: nginx:latest
+    container_name: my-website-container
+    volumes:
+      - ./Sprint_1_Product:/usr/share/nginx/html
+    ports:
+      - "80:80"
+    restart: always
